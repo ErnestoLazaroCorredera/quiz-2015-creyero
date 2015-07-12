@@ -8,10 +8,10 @@ exports.answer = function(req,res) {
 	if (req.query.respuesta == 'Roma') {
 	   res.render('quizes/answer',{respuesta: 'Correcto'});
 	} else {
-	   res.render('quizes/answer',{respuesta: 'Incorrecto'}); 
+	   res.render('quizes/answer',{respuesta: 'Incorrecto'});
 	}
 };
 // GET /author
 exports.author=function(req,res) {
-res.render('quizes/author',{autor: 'Carlos Reyero'});
+res.render('author',{autor: 'Carlos Reyero'});
 };
