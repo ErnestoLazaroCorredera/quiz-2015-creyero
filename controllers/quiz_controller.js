@@ -13,5 +13,5 @@ exports.answer = function(req,res) {
 };
 // GET /author
 exports.author=function(req,res) {
-res.render('author',{autor: 'Carlos Reyero'});
+res.render('quizes/author',{autor: 'Carlos Reyero'});
 };
