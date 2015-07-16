@@ -1,7 +1,11 @@
 var models =require('../models/models.js');
 
 // GET /quizes
+<<<<<<< HEAD
 exports.index = function(req,res) {
+=======
+export.index = function(req,res) {
+>>>>>>> 5ff9f961fe681c86470711293e245be9fe18e2c7
 	 models.Quiz.findAll().then(function(quizes) {
 		 res.render('quizes/index.ejs', {quizes: quizes});
 	 });
@@ -24,7 +28,11 @@ exports.answer = function(req,res){
 			res.render('quizes/answer',
 									{quiz: quiz,respuesta: 'Incorrecto'});
 		}
+<<<<<<< HEAD
 	});
+=======
+	)}
+>>>>>>> 5ff9f961fe681c86470711293e245be9fe18e2c7
 };
 
 // GET /quizes/question
