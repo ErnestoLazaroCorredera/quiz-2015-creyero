@@ -25,8 +25,11 @@ res.render('quizes/question',{pregunta: quiz[0].pregunta})
 
 // GET /quizes
 exports.index = function(req,res) {
-	 models.Quiz.findAll().then(function(quiz) {
-		 res.render('quizes/index', {quiz: quiz});
+//models.Quiz.findAll({where: ["pregunta like ?", search]}).success(function(quiz) {
+//models.Quiz.findAll({order: 'pregunta DESC'}).success(function(quiz)
+//	 models.Quiz.findAll().then(function(quiz) {
+models.Quiz.findAll({where: ["pregunta like ?", '%' +req.query.search + '%']},{order: 'pregunta'}).then(function(quiz) {
+   res.render('quizes/index', {quiz: quiz});
 	 }).catch(function(error) {next(error);});
 };
 
