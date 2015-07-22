@@ -13,7 +13,7 @@ exports.load=function (req, res,next,quizId) {
 };
 // GET /author
 exports.author=function(req,res) {
-res.render('quizes/author',{autor: 'Carlos Reyero'});
+res.render('quizes/author',{autor: 'Carlos Reyero',errors:[]});
 };
 
 // GET /quizes/question
@@ -29,7 +29,7 @@ exports.index = function(req,res) {
 //models.Quiz.findAll({order: 'pregunta DESC'}).success(function(quiz)
 //	 models.Quiz.findAll().then(function(quiz) {
 models.Quiz.findAll({where: ["pregunta like ?", '%' +req.query.search + '%']},{order: 'pregunta'}).then(function(quiz) {
-   res.render('quizes/index', {quiz: quiz});
+   res.render('quizes/index', {quiz: quiz,errors:[]});
 	 }).catch(function(error) {next(error);});
 };
 
@@ -37,7 +37,7 @@ models.Quiz.findAll({where: ["pregunta like ?", '%' +req.query.search + '%']},{o
 exports.show = function(req,res){
 //	models.Quiz.find(req.params.quizId).then(function(quiz){
 //		res.render('quizes/show',{quiz:quiz});
-		res.render('quizes/show',{quiz:req.quiz});
+		res.render('quizes/show',{quiz:req.quiz,errors:[]});
 //	});
 };
 
@@ -56,7 +56,10 @@ var resultado = 'Incorrecto';
 if (req.query.respuesta ===req.quiz.respuesta) {
 	resultado = 'Correcto';
 }
-res.render('quizes/answer',{quiz: req.quiz, respuesta: resultado});
+res.render('quizes/answer',
+{quiz: req.quiz,
+ respuesta: resultado,
+ errors:[]});
 };
 
 //GET /quizes/new
@@ -64,19 +67,30 @@ exports.new = function (req,res) {
 	var quiz = models.Quiz.build ( // Crea objeto quiz
 		{pregunta: "Pregunta", respuesta: "Respuesta"}
 	);
-	res.render('quizes/new', {quiz: quiz});
+	res.render('quizes/new', {quiz: quiz,errors:[]});
 };
 
 //POST /quizes/create
 exports.create = function(req,res) {
 	var quiz = models.Quiz.build(req.body.quiz);
 
+quiz.validate().success(
+	function(err) {		 if (err) {
+			 res.render('quizes/new',{quiz:quiz,errors: err.errors});
+		 }
+else {
 // guarda en DB los campos pregunta y respuesta de quiz
-quiz.save({fields: ["pregunta", "respuesta"]}).then(function(){
-	res.redirect('/quizes');
-}) // Redirección HTTP ( URL relativo) lista de preguntas
+quiz.save({fields: ["pregunta", "respuesta"]})
+.then(function(){	res.redirect('/quizes')})
+  }
+	// Redirección HTTP ( URL relativo) lista de preguntas
+}
+);
+//quiz.save({fields:["pregunta","respuesta"]}).then(function(){
+//	res.redirect('/quizes');
+//})
+ // Redirección HTTP ( URL relativo) lista de preguntas
 };
-
 // GET /quizes/question
 //exports.question=function(req,res) {
 //res.render('quizes/question',{pregunta: 'Capital de Italia'});
