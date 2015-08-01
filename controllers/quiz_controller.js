@@ -7,7 +7,9 @@ exports.load=function (req, res,next,quizId) {
 			if (quiz) {
 				req.quiz=quiz;
 				next();
-			} else { next(Error('No existe quizId=' + quizId));}
+			}
+			else { next( new Error('No existe quizId=' + quizId));
+		         }
 		}
 	).catch(function(error){next(error);});
 };
@@ -28,7 +30,7 @@ exports.index = function(req,res) {
 //models.Quiz.findAll({where: ["pregunta like ?", search]}).success(function(quiz) {
 //models.Quiz.findAll({order: 'pregunta DESC'}).success(function(quiz)
 //	 models.Quiz.findAll().then(function(quiz) {
-models.Quiz.findAll({where: ["pregunta like ?", '%' +req.query.search + '%']},{order: 'pregunta'}).then(function(quiz) {
+models.Quiz.findAll({where: ["upper(pregunta) like upper(?)", '%' +req.query.search + '%']},{order: 'pregunta'}).then(function(quiz) {
    res.render('quizes/index', {quiz: quiz,errors:[]});
 	 }).catch(function(error) {next(error);});
 };
@@ -65,7 +67,7 @@ res.render('quizes/answer',
 //GET /quizes/new
 exports.new = function (req,res) {
 	var quiz = models.Quiz.build ( // Crea objeto quiz
-		{pregunta: "Pregunta", respuesta: "Respuesta"}
+		{pregunta: "pregunta", respuesta: "respuesta", tema: "tema"}
 	);
 	res.render('quizes/new', {quiz: quiz,errors:[]});
 };
@@ -74,23 +76,59 @@ exports.new = function (req,res) {
 exports.create = function(req,res) {
 	var quiz = models.Quiz.build(req.body.quiz);
 
-quiz.validate().success(
-	function(err) {		 if (err) {
-			 res.render('quizes/new',{quiz:quiz,errors: err.errors});
-		 }
-else {
+//quiz.validate().success(
+//	function(err) {		 if (err) {
+//			 res.render('quizes/new',{quiz:quiz,errors: err.errors});
+//		 }
+//else {
 // guarda en DB los campos pregunta y respuesta de quiz
-quiz.save({fields: ["pregunta", "respuesta"]})
+quiz.save({fields: ["pregunta", "respuesta", "tema"]})
 .then(function(){	res.redirect('/quizes')})
-  }
+//  }
 	// Redirección HTTP ( URL relativo) lista de preguntas
-}
-);
+//}
+//);
 //quiz.save({fields:["pregunta","respuesta"]}).then(function(){
 //	res.redirect('/quizes');
 //})
  // Redirección HTTP ( URL relativo) lista de preguntas
 };
+
+// GET /quizes/:id/edit
+exports.edit = function(req,res){
+var quiz = req.quiz; //autoload de instancia de quiz
+res.render('quizes/edit', {quiz: quiz, errors: []});
+};
+
+//PUT /quizes/:id
+exports.update = function(req,res) {
+	req.quiz.pregunta = req.body.quiz.pregunta;
+	req.quiz.respuesta = req.body.quiz.respuesta;
+	req.quiz.tema = req.body.quiz.tema;
+
+//req.quiz.validate().success(
+//	function(err) {		 if (err) {
+//			 res.render('quizes/edit',{quiz:req.quiz,errors: err.errors});
+//		 }
+//else {
+// guarda en DB los campos pregunta y respuesta de quiz
+//req.quiz.save({fields: ["pregunta", "respuesta"]})
+//.success(function(){	res.redirect('/quizes');});
+//  }
+	// Redirección HTTP ( URL relativo) lista de preguntas
+//}
+//);
+req.quiz.save({fields: ["pregunta", "respuesta","tema"]})
+.success(function(){	res.redirect('/quizes');});
+};
+
+// DELETE /quizes/:id
+exports.destroy = function(req, res) {
+  req.quiz.destroy().then( function() {
+    res.redirect('/quizes');
+  }).catch(function(error){next(error)});
+};
+
 // GET /quizes/question
 //exports.question=function(req,res) {
 //res.render('quizes/question',{pregunta: 'Capital de Italia'});
