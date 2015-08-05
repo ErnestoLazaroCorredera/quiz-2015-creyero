@@ -5,7 +5,8 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var partials = require('express-partials');
-var methodOverride = require('method-override')
+var methodOverride = require('method-override');
+var session = require('express-session');
 var routes = require('./routes/index');
 
 var app = express();
@@ -21,11 +22,43 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 // app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.urlencoded());
-app.use(cookieParser());
+app.use(cookieParser('Quiz 2015'));
+app.use(session());
 app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Helpers dinamicos:
+app.use(function(req, res, next) {
+
+  // guardar path en session.redir para despues de login
+  if (!req.path.match(/\/login|\/logout/)) {
+    req.session.redir = req.path;
+  }
+
+  // Hacer visible req.session en las vistas
+  res.locals.session = req.session;
+
+  // Auto-logout de sesión
+  if (req.session.user) {
+    if (!req.session.timestamp) {
+      req.session.timestamp = Date.now();
+    } else {
+      if(Date.now() - req.session.timestamp > 120000) {
+        delete req.session.user;
+        delete req.session.timestamp;
+      } else {
+        req.session.timestamp = Date.now();
+      }
+    }
+  }
+
+  next();
+});
+
+
 app.use('/', routes);
+app.use('/quizes/question', routes);
+app.use('/quizes/answer', routes);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
